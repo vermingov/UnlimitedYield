@@ -4337,6 +4337,7 @@ CMDs[#CMDs + 1] = {NAME = 'unload / killuy', DESC = 'Unloads UnlimitedYield'}
 CMDs[#CMDs + 1] = {NAME = 'stalk', DESC = 'Stalks player from afar [NOT TOGGLE]'}
 CMDs[#CMDs + 1] = {NAME = 'exec [script]', DESC = 'Executes lua code into the game'}
 CMDs[#CMDs + 1] = {NAME = 'bypasschat / chatbypass / allowswearing', DESC = 'Bypasses the roblox swearing filter'}
+CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', DESC = 'Autofarms boxes in NorthLondonRemastered'}
 
 
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Unlimited Yield support server.'}
@@ -11086,6 +11087,12 @@ addcmd('unload',{'killuy'},function(args, speaker)
 	Connections = {}
 	UYMouse = nil
 end)
+
+addcmd('NLRA',{'northlondonremasteredautofarm', 'nlrautofarm'},function(args, speaker)
+	notify("Autofarm Injected",'F4 To Toggle')
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/vermingov/UY-Scripts/refs/heads/main/NorthLondonRemastered-Autofarm.lua'))()
+end)
+
 
 addcmd('chatbypass',{'bypasschat', 'allowswearing'},function(args, speaker)
 	notify("Bypass Initiated",'Key = nolie')
