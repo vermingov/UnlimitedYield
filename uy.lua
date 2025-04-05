@@ -4760,7 +4760,7 @@ CMDs[#CMDs + 1] = {NAME = 'ctrllock', DESC = 'Binds Shiftlock to LeftControl'}
 CMDs[#CMDs + 1] = {NAME = 'unctrllock', DESC = 'Re-binds Shiftlock to LeftShift'}
 CMDs[#CMDs + 1] = {NAME = 'listento [player]', DESC = 'Listens to the area around a player. Can also eavesdrop with vc'}
 CMDs[#CMDs + 1] = {NAME = 'unlistento', DESC = 'Disables listento'}
-CMDs[#CMDs + 1] = {NAME = 'jerk', DESC = 'Makes you jork it'}
+CMDs[#CMDs + 1] = {NAME = 'goon', DESC = 'Makes you jork it'}
 CMDs[#CMDs + 1] = {NAME = 'unsuspendvc', DESC = 'Unsuspends you from voice chat'}
 wait()
 
@@ -13213,13 +13213,13 @@ addcmd("unlistento", {}, function(args, speaker)
     listentoChar:Disconnect()
 end)
 
-addcmd("jerk", {}, function(args, speaker)
+addcmd("goon", {}, function(args, speaker)
     local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
     local backpack = speaker:FindFirstChildWhichIsA("Backpack")
     if not humanoid or not backpack then return end
 
     local tool = Instance.new("Tool")
-    tool.Name = "Jerk Off"
+    tool.Name = "Goon"
     tool.ToolTip = "in the stripped club. straight up \"jorking it\" . and by \"it\" , haha, well. let's justr say. My peanits."
     tool.RequiresHandle = false
     tool.Parent = backpack
