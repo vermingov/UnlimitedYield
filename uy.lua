@@ -4336,6 +4336,7 @@ CMDs[#CMDs + 1] = {NAME = 'unantiwalkspeeddetector / unawsd / unantiws', DESC = 
 CMDs[#CMDs + 1] = {NAME = 'unload / killuy', DESC = 'Unloads UnlimitedYield'}
 CMDs[#CMDs + 1] = {NAME = 'stalk', DESC = 'Stalks player from afar [NOT TOGGLE]'}
 CMDs[#CMDs + 1] = {NAME = 'exec [script]', DESC = 'Executes lua code into the game'}
+CMDs[#CMDs + 1] = {NAME = 'bypasschat / chatbypass / allowswearing', DESC = 'Bypasses the roblox swearing filter'}
 
 
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Unlimited Yield support server.'}
@@ -11086,7 +11087,11 @@ addcmd('unload',{'killuy'},function(args, speaker)
 	UYMouse = nil
 end)
 
-
+addcmd('chatbypass',{'bypasschat', 'allowswearing'},function(args, speaker)
+	notify("Loading",'Hold on a sec')
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/vermingov/UnlimitedYield/refs/heads/main/uy.lua'))()
+    notify("Bypass Initiated",'Key = nolie')
+end)
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
 	notify("Loading",'Hold on a sec')
