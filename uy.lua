@@ -4337,7 +4337,7 @@ CMDs[#CMDs + 1] = {NAME = 'unload / killuy', DESC = 'Unloads UnlimitedYield'}
 CMDs[#CMDs + 1] = {NAME = 'stalk', DESC = 'Stalks player from afar [NOT TOGGLE]'}
 CMDs[#CMDs + 1] = {NAME = 'exec [script]', DESC = 'Executes lua code into the game'}
 CMDs[#CMDs + 1] = {NAME = 'bypasschat / chatbypass / allowswearing', DESC = 'Bypasses the roblox swearing filter'}
-CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', DESC = 'Autofarms boxes in NorthLondonRemastered'}
+CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', DESC = 'Autofarms boxes in NorthLondonRemastered [ADONIS BYPASS NEEDED]'}
 
 
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Unlimited Yield support server.'}
