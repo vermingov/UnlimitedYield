@@ -11089,7 +11089,7 @@ end)
 
 addcmd('chatbypass',{'bypasschat', 'allowswearing'},function(args, speaker)
 	notify("Loading",'Hold on a sec')
-	loadstring(game:HttpGet('https://raw.githubusercontent.com/vermingov/UnlimitedYield/refs/heads/main/uy.lua'))()
+	loadstring(game:HttpGet('https://catbypasser.lol/main.lua'))()
     notify("Bypass Initiated",'Key = nolie')
 end)
 
