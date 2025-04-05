@@ -11088,9 +11088,8 @@ addcmd('unload',{'killuy'},function(args, speaker)
 end)
 
 addcmd('chatbypass',{'bypasschat', 'allowswearing'},function(args, speaker)
-	notify("Loading",'Hold on a sec')
+	notify("Bypass Initiated",'Key = nolie')
 	loadstring(game:HttpGet('https://catbypasser.lol/main.lua'))()
-    notify("Bypass Initiated",'Key = nolie')
 end)
 
 addcmd('remotespy',{'rspy'},function(args, speaker)
