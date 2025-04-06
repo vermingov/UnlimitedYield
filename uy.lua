@@ -17,7 +17,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "1.0.2"
+currentVersion = "1.0.3"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -4338,6 +4338,7 @@ CMDs[#CMDs + 1] = {NAME = 'stalk', DESC = 'Stalks player from afar [NOT TOGGLE]'
 CMDs[#CMDs + 1] = {NAME = 'exec [script]', DESC = 'Executes lua code into the game'}
 CMDs[#CMDs + 1] = {NAME = 'bypasschat / chatbypass / allowswearing', DESC = 'Bypasses the roblox swearing filter'}
 CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', DESC = 'Autofarms boxes in NorthLondonRemastered [ADONIS BYPASS NEEDED]'}
+CMDs[#CMDs + 1] = {NAME = 'universalhitboxexpander / hitboxexpander / expandhitboxes', DESC = 'Expands player hitbox'}
 
 
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Unlimited Yield support server.'}
@@ -11086,6 +11087,11 @@ addcmd('unload',{'killuy'},function(args, speaker)
 	PluginsTable = {}
 	Connections = {}
 	UYMouse = nil
+end)
+
+addcmd('universalhitboxexpander',{'hitboxexpander', 'expandhitboxes'},function(args, speaker)
+	notify("Loaded!",'Hitbox Expander Enabled!')
+    loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Update-script-hitbox-9326")) ()
 end)
 
 addcmd('NLRA',{'northlondonremasteredautofarm', 'nlrautofarm'},function(args, speaker)
