@@ -8815,7 +8815,35 @@ addcmd('antiafk',{'antiidle'},function(args, speaker)
 			VirtualUser:ClickButton2(Vector2.new())
 		end)
 	end
-	if not (args[1] and tostring(args[1]) == 'nonotify') then notify('Anti Idle','Anti idle is enabled') end
+	
+	-- Set up memory management to prevent RAM buildup over time
+	local RunService = cloneref(game:GetService("RunService"))
+	local memoryCleanupConnection
+	
+	memoryCleanupConnection = RunService.Heartbeat:Connect(function()
+		-- Only run cleanup every 10 minutes to avoid performance impact
+		if tick() % 600 < 1 then
+			-- Force garbage collection
+			for i = 1, 5 do
+				game:GetService("Debris"):AddItem(Instance.new("Frame"), 0)
+			end
+			collectgarbage("collect")
+			
+			-- Clear rendering cache to prevent memory leaks
+			game:GetService("ContentProvider"):PreloadAsync({})
+			
+			-- Clear unused assets from memory
+			for _, v in pairs(game:GetDescendants()) do
+				if v:IsA("BasePart") and not v.Parent:IsA("Workspace") and not v:IsDescendantOf(speaker.Character) then
+					v:ClearAllChildren()
+				end
+			end
+		end
+	end)
+	
+	table.insert(Connections, memoryCleanupConnection)
+	
+	if not (args[1] and tostring(args[1]) == 'nonotify') then notify('Anti Idle','Anti idle is enabled with memory management') end
 end)
 
 addcmd("datalimit", {}, function(args, speaker)
@@ -11151,51 +11179,115 @@ function chatMessage(str)
 end
 
 local messages = {
-	"please donate... i haven't seen a robux in days",
-	"i'm saving up for my dreams... which cost exactly 1 robux",
-	"you can ignore me like everyone else... or donate",
-	"just one robux can change a life. mine.",
-	"if you donate, i might stop crying. no promises",
-	"i'm not begging, i'm strategically requesting financial aid",
-	"robux isn't everything... but it would fix a lot right now",
-	"donate and prove you're better than the last 10 people who walked past",
-	"my stand is cold. my wallet is colder",
-	"you ever feel broke? imagine how i feel asking for donations",
-	"donate or i’ll start pretending to be an NPC. it’s already happening",
-	"i used to have hope. then i made this game",
-	"help a stranger today. maybe karma will hit you back with headless",
-	"i’m not crying, you’re crying. okay maybe we both are",
-	"being ignored builds character. donating builds happiness",
-	"this stand is powered by sadness and empty promises",
-	"i'll stop typing if you donate. probably. maybe.",
-	"donate now and unlock a free feeling of moral superiority",
-	"donate and become a legend. or don’t, and be like everyone else",
-	"you made it this far. one more step... to the donate button",
-	"this is a social experiment. you failed. unless you donate",
-	"you can end this suffering with just one robux",
-	"i tried working a real job in Bloxburg. it didn’t work out",
-	"donate now or i’ll keep standing here awkwardly forever",
-	"i'm not broke. i'm financially challenged and emotionally unstable",
-	"if you donate, i’ll say something nice about your avatar",
-	"your donation might not matter to the world. but it’ll mean everything to me",
-	"this is my full-time job now. help me get promoted",
-	"donate and you’ll get a lifetime supply of my gratitude",
-	"don’t donate for me. do it for the pixels",
-	"they said i wouldn’t make it. they were right. unless you donate"
+	"pls donate im literally shaking rn my pet goldfish needs robux",
+	"one robux = one prayer for my roblox avatar's happiness",
+	"donate and i'll do a little dance that nobody can see but i promise it's happening",
+	"my mom said if i get 10 robux she'll let me eat dinner tonight",
+	"i've been standing here so long my legs turned into pixels",
+	"help a noob out plssss i just want cool stuff like everyone else",
+	"i'm not poor i'm just robux challenged",
+	"donate and become my best friend forever and ever no take backs",
+	"i'll remember your username if you donate and think about how cool you are",
+	"my avatar is sad because it has no robux :( look at its face",
+	"i've been clicking the same button for 3 days trying to earn robux help meeeee",
+	"donate or i'll keep doing this weird dance until the server shuts down",
+	"i named my pet rock after the last person who donated to me",
+	"i'm saving up for a gamepass that costs exactly whatever you donate",
+	"my older brother said only cool people donate robux are you cool???",
+	"i promise i won't spend your robux on silly hats (i totally will)",
+	"donate and i'll tell you a secret about this game that i just made up",
+	"help me i'm stuck in an endless loop of asking for robux aaaaaaaa",
+	"i've been wearing the same free shirt for 5 years straight",
+	"donate and i'll stop following you around the map probably",
+	"i tried to get robux by doing my chores but my mom said no",
+	"i'm not begging i'm just asking repeatedly with increasing desperation",
+	"donate and i'll friend you and then immediately forget who you are",
+	"i've been saving up since 2010 and have exactly 3 robux to show for it",
+	"my dream is to own a virtual hat that costs real money please help",
+	"i told my little brother i'd get him robux but i lied help me fix this",
+	"donate and i'll name my next roblox character after you maybe",
+	"i'm collecting robux like they're pokemon except i have none",
+	"help a fellow human who is definitely not a donation bot i promise",
+	"donate or i'll keep typing these messages until my keyboard breaks",
+	"my roblox character hasn't eaten in days he's surviving on free items",
+	"donate and i'll tell everyone you're the coolest person in the server",
+	"i've been playing so long my avatar is getting old and needs robux medicine",
+	"pls donate i need robux for my imaginary roblox wedding tomorrow",
+	"i'll give you a virtual high five if you donate (you won't feel it but it's real)",
+	"donate and i'll stop crying on the inside and start crying on the outside",
+	"my robux wallet is so empty even dust moved out",
+	"i've been saving up for 69 years and still can't afford korblox legs",
+	"donate if you think bacon hairs deserve rights too",
+	"i'll remember your kindness until the next server hop",
+	"donate and i'll do my homework probably maybe not really",
+	"help me i accidentally spent all my robux on a pet simulator gamepass",
+	"i'm so broke my avatar can't afford shoes look at my feet",
+	"donate and i'll stop talking for at least 5 seconds",
+	"i need robux to feed my 47 adopt me pets they're starving",
+	"my only friend is the donate button and it doesn't even like me back",
+	"donate and i'll tell you the secret to getting free robux (there isn't one)",
+	"i've been here so long the server thinks i'm part of the map",
+	"pls donate my roblox gf will break up with me if i don't get robux",
+	"i'm not poor i just enjoy standing at donation stands for fun",
+	"donate and i'll give you a shoutout to my zero followers",
+	"help me afford a face so i can finally express emotions",
+	"i've been refreshing my robux balance for 3 days nothing's changed",
+	"donate and i'll stop using these cringey messages (no i won't)",
+	"i need robux to buy a better gaming chair for more wins",
+	"my dream is to own something that costs robux anything please help",
+	"donate and i'll tell my mom you're cool she won't care but i'll tell her",
+	"i'm saving up for a robux item that will definitely be offsale tomorrow",
+	"help me i've been wearing the same free face since 2016",
+	"donate and i'll draw your avatar with my eyes closed on ms paint"
 }
 
--- Index tracker
-local currentIndex = 1
+-- Keep track of recently used messages
+local recentlyUsed = {}
+local maxRecentMessages = 5
+
+-- Function to get a random message that hasn't been used recently
+function getRandomMessage()
+	-- Create a list of available messages (not in recently used)
+	local availableMessages = {}
+	for i, message in ipairs(messages) do
+		local isRecent = false
+		for _, recentIndex in ipairs(recentlyUsed) do
+			if i == recentIndex then
+				isRecent = true
+				break
+			end
+		end
+		
+		if not isRecent then
+			table.insert(availableMessages, {index = i, message = message})
+		end
+	end
+	
+	-- If somehow all messages are in recently used (shouldn't happen with our setup)
+	if #availableMessages == 0 then
+		local randomIndex = math.random(1, #messages)
+		return randomIndex, messages[randomIndex]
+	end
+	
+	-- Pick a random message from available ones
+	local randomChoice = math.random(1, #availableMessages)
+	local selectedIndex = availableMessages[randomChoice].index
+	
+	-- Update recently used list
+	table.insert(recentlyUsed, selectedIndex)
+	if #recentlyUsed > maxRecentMessages then
+		table.remove(recentlyUsed, 1)
+	end
+	
+	return selectedIndex, messages[selectedIndex]
+end
 
 -- Chat loop
 task.spawn(function()
 	while true do
-		chatMessage(messages[currentIndex])
-		currentIndex += 1
-		if currentIndex > #messages then
-			currentIndex = 1
-		end
-		task.wait(12)
+		local _, selectedMessage = getRandomMessage()
+		chatMessage(selectedMessage)
+		task.wait(15)
 	end
 end)
 
