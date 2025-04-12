@@ -11113,41 +11113,37 @@ function chatMessage(str)
 end
 
 local messages = {
-	"please donate... i'm literally living in a cardboard obby 😭",
-	"every second you don't donate, a noob cries",
-	"i'm saving up to touch grass IRL... help me make it happen 🥲",
-	"just 1 robux can cure my crippling avatar addiction",
-	"donate or I’ll start flossing in public servers again 🕺",
-	"if you donate, I promise to stop crying. maybe.",
-	"robux = happiness. make me fucking happy.",
-	"donate and I'll shut up for 5 seconds. maybe.",
-	"my pet rock is starving. don't let it die.",
-	"don’t let your heart be colder than my wallet 🧊💔",
-	"please... my outfit costs more than my life is worth.",
-	"donating is cheaper than therapy. for *me*, not you.",
-	"i bet you won’t donate. prove me wrong, moneybags 😏",
-	"every robux you give me increases your drip stat +5",
-	"i'm not saying you're hot if you donate... but you are 🔥",
-	"be the reason i don’t uninstall tonight 😩",
-	"i'd sell my soul but no one wants it. donate instead.",
-	"donate or i’ll ratio your whole bloodline 🫵",
-	"if i had a robux for every tear i shed, i wouldn’t be here.",
-	"this isn't a game anymore... this is survival.",
-	"you're walking by like you're better than me. prove you’re not.",
-	"imagine how good you’ll feel giving to the less fortunate. like me.",
-	"donate and i’ll name my next child after you. even if it’s a pet.",
-	"no robux? no friends? no dignity? same. help me out.",
-	"don’t make me start fake crying in chat again 😭😭",
-	"donating now gives you +10 clout and +3 attractiveness",
-	"i'm just a poor little script, standing in front of a rich player, asking for love",
-	"i’ll stop talking if you donate. OR I WON’T. YOUR MOVE.",
-	"robux = respect. right now i have neither.",
-	"my parents said i’d never make it. prove them wrong with 5 robux.",
-	"donating is cheaper than buying a conscience.",
-	"if you don’t donate, i’ll start roleplaying. and nobody wants that.",
-	"i’m so broke my pet just left me for a premium user.",
-	"you're my only hope. and you’re ignoring me. cold.",
-	"donate or i’ll play ‘let it go’ on loop in public chat 🎶"
+	"please donate... i haven't seen a robux in days",
+	"i'm saving up for my dreams... which cost exactly 1 robux",
+	"you can ignore me like everyone else... or donate",
+	"just one robux can change a life. mine.",
+	"if you donate, i might stop crying. no promises",
+	"i'm not begging, i'm strategically requesting financial aid",
+	"robux isn't everything... but it would fix a lot right now",
+	"donate and prove you're better than the last 10 people who walked past",
+	"my stand is cold. my wallet is colder",
+	"you ever feel broke? imagine how i feel asking for donations",
+	"donate or i’ll start pretending to be an NPC. it’s already happening",
+	"i used to have hope. then i made this game",
+	"help a stranger today. maybe karma will hit you back with headless",
+	"i’m not crying, you’re crying. okay maybe we both are",
+	"being ignored builds character. donating builds happiness",
+	"this stand is powered by sadness and empty promises",
+	"i'll stop typing if you donate. probably. maybe.",
+	"donate now and unlock a free feeling of moral superiority",
+	"donate and become a legend. or don’t, and be like everyone else",
+	"you made it this far. one more step... to the donate button",
+	"this is a social experiment. you failed. unless you donate",
+	"you can end this suffering with just one robux",
+	"i tried working a real job in Bloxburg. it didn’t work out",
+	"donate now or i’ll keep standing here awkwardly forever",
+	"i'm not broke. i'm financially challenged and emotionally unstable",
+	"if you donate, i’ll say something nice about your avatar",
+	"your donation might not matter to the world. but it’ll mean everything to me",
+	"this is my full-time job now. help me get promoted",
+	"donate and you’ll get a lifetime supply of my gratitude",
+	"don’t donate for me. do it for the pixels",
+	"they said i wouldn’t make it. they were right. unless you donate"
 }
 
 -- Index tracker
@@ -11161,7 +11157,7 @@ task.spawn(function()
 		if currentIndex > #messages then
 			currentIndex = 1
 		end
-		task.wait(5)
+		task.wait(12)
 	end
 end)
 
