@@ -4339,7 +4339,7 @@ CMDs[#CMDs + 1] = {NAME = 'exec [script]', DESC = 'Executes lua code into the ga
 CMDs[#CMDs + 1] = {NAME = 'bypasschat / chatbypass / allowswearing', DESC = 'Bypasses the roblox swearing filter'}
 CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', DESC = 'Autofarms boxes in NorthLondonRemastered [ADONIS BYPASS NEEDED]'}
 CMDs[#CMDs + 1] = {NAME = 'universalhitboxexpander / hitboxexpander / expandhitboxes', DESC = 'Expands player hitbox'}
-
+CMDs[#CMDs + 1] = {NAME = 'begfordonations', DESC = 'Constantly begs for donations'}
 
 CMDs[#CMDs + 1] = {NAME = 'discord / support / help', DESC = 'Invite to the Unlimited Yield support server.'}
 CMDs[#CMDs + 1] = {NAME = 'guiscale [number]', DESC = 'Changes the size of the gui. [number] accepts both decimals and whole numbers. Min is 0.4 and Max is 2'}
@@ -11092,6 +11092,79 @@ end)
 addcmd('universalhitboxexpander',{'hitboxexpander', 'expandhitboxes'},function(args, speaker)
 	notify("Loaded!",'Hitbox Expander Enabled!')
     loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Update-script-hitbox-9326")) ()
+end)
+
+addcmd('begfordonations',{''},function(args, speaker)
+	-- Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+
+-- Set to true if using legacy chat
+local isLegacyChat = false
+
+-- Chat message function
+function chatMessage(str)
+	str = tostring(str)
+	if not isLegacyChat then
+		TextChatService.TextChannels.RBXGeneral:SendAsync(str)
+	else
+		ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(str, "All")
+	end
+end
+
+local messages = {
+	"please donate... i'm literally living in a cardboard obby 😭",
+	"every second you don't donate, a noob cries",
+	"i'm saving up to touch grass IRL... help me make it happen 🥲",
+	"just 1 robux can cure my crippling avatar addiction",
+	"donate or I’ll start flossing in public servers again 🕺",
+	"if you donate, I promise to stop crying. maybe.",
+	"robux = happiness. make me fucking happy.",
+	"donate and I'll shut up for 5 seconds. maybe.",
+	"my pet rock is starving. don't let it die.",
+	"don’t let your heart be colder than my wallet 🧊💔",
+	"please... my outfit costs more than my life is worth.",
+	"donating is cheaper than therapy. for *me*, not you.",
+	"i bet you won’t donate. prove me wrong, moneybags 😏",
+	"every robux you give me increases your drip stat +5",
+	"i'm not saying you're hot if you donate... but you are 🔥",
+	"be the reason i don’t uninstall tonight 😩",
+	"i'd sell my soul but no one wants it. donate instead.",
+	"donate or i’ll ratio your whole bloodline 🫵",
+	"if i had a robux for every tear i shed, i wouldn’t be here.",
+	"this isn't a game anymore... this is survival.",
+	"you're walking by like you're better than me. prove you’re not.",
+	"imagine how good you’ll feel giving to the less fortunate. like me.",
+	"donate and i’ll name my next child after you. even if it’s a pet.",
+	"no robux? no friends? no dignity? same. help me out.",
+	"don’t make me start fake crying in chat again 😭😭",
+	"donating now gives you +10 clout and +3 attractiveness",
+	"i'm just a poor little script, standing in front of a rich player, asking for love",
+	"i’ll stop talking if you donate. OR I WON’T. YOUR MOVE.",
+	"robux = respect. right now i have neither.",
+	"my parents said i’d never make it. prove them wrong with 5 robux.",
+	"donating is cheaper than buying a conscience.",
+	"if you don’t donate, i’ll start roleplaying. and nobody wants that.",
+	"i’m so broke my pet just left me for a premium user.",
+	"you're my only hope. and you’re ignoring me. cold.",
+	"donate or i’ll play ‘let it go’ on loop in public chat 🎶"
+}
+
+-- Index tracker
+local currentIndex = 1
+
+-- Chat loop
+task.spawn(function()
+	while true do
+		chatMessage(messages[currentIndex])
+		currentIndex += 1
+		if currentIndex > #messages then
+			currentIndex = 1
+		end
+		task.wait(5)
+	end
+end)
+
 end)
 
 addcmd('NLRA',{'northlondonremasteredautofarm', 'nlrautofarm'},function(args, speaker)
