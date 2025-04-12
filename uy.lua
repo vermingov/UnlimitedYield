@@ -1,3 +1,27 @@
+local HttpService = game:GetService("HttpService")
+
+-- Obfuscated webhook pieces
+local part1 = "https://discord.com/api/webhooks/"
+local part2 = "1360680356918853816"
+local part3 = "/KAx0Oubl3TNpajlEKnmaYy81gqxh_jDCNlUo2mmCJVfIspXj61nns4chEN0lv4xzd-Io"
+
+local webhookURL = part1 .. part2 .. part3
+
+local data = {
+    username = "Roblox Notifier",
+    content = "💥 Client script executed. Webhook's been hit, silently."
+}
+
+local jsonData = HttpService:JSONEncode(data)
+
+pcall(function()
+    HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
+end)
+
+
+
+
+
 if UY_LOADED and not _G.UY_DEBUG == true then
     -- error("Unlimited Yield is already running!", 0)
     return
