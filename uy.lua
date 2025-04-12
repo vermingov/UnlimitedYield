@@ -4334,7 +4334,7 @@ CMDs[#CMDs + 1] = {NAME = 'adonisbypass / adb', DESC = 'Bypasses Adonis Anti-Che
 CMDs[#CMDs + 1] = {NAME = 'antiwalkspeeddetector / awsd / antiws', DESC = '[BETA] Bypasses Walkspeed Detection'}
 CMDs[#CMDs + 1] = {NAME = 'unantiwalkspeeddetector / unawsd / unantiws', DESC = 'Disables the walksped detection bypass'}
 CMDs[#CMDs + 1] = {NAME = 'unload / killuy', DESC = 'Unloads UnlimitedYield'}
-CMDs[#CMDs + 1] = {NAME = 'stalk', DESC = 'Stalks player from afar [NOT TOGGLE]'}
+CMDs[#CMDs + 1] = {NAME = 'stalk [player]', DESC = 'Stalks player from afar [NOT TOGGLE]'}
 CMDs[#CMDs + 1] = {NAME = 'exec [script]', DESC = 'Executes lua code into the game'}
 CMDs[#CMDs + 1] = {NAME = 'bypasschat / chatbypass / allowswearing', DESC = 'Bypasses the roblox swearing filter'}
 CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', DESC = 'Autofarms boxes in NorthLondonRemastered [ADONIS BYPASS NEEDED]'}
