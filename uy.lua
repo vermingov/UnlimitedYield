@@ -55,7 +55,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "1.0.3"
+currentVersion = "1.0.4"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -4805,7 +4805,10 @@ CMDs[#CMDs + 1] = {NAME = 'ctrllock', DESC = 'Binds Shiftlock to LeftControl'}
 CMDs[#CMDs + 1] = {NAME = 'unctrllock', DESC = 'Re-binds Shiftlock to LeftShift'}
 CMDs[#CMDs + 1] = {NAME = 'listento [player]', DESC = 'Listens to the area around a player. Can also eavesdrop with vc'}
 CMDs[#CMDs + 1] = {NAME = 'unlistento', DESC = 'Disables listento'}
+CMDs[#CMDs + 1] = {NAME = 'facefuck / bj / blowjob / head [player]', DESC = 'Positions you in front of target player\'s head with animation'}
+CMDs[#CMDs + 1] = {NAME = 'unfacefuck / unbj / unblowjob / unhead', DESC = 'Stops the facefuck animation and positioning'}
 CMDs[#CMDs + 1] = {NAME = 'goon', DESC = 'Makes you jork it'}
+CMDs[#CMDs + 1] = {NAME = 'fent / getfent', DESC = 'Gives you fentanyl (R6 only)'}
 CMDs[#CMDs + 1] = {NAME = 'unsuspendvc', DESC = 'Unsuspends you from voice chat'}
 wait()
 
@@ -14013,6 +14016,135 @@ addcmd("unlistento", {}, function(args, speaker)
     SoundService:SetListener(Enum.ListenerType.Camera)
     listentoChar:Disconnect()
 end)
+
+local facefuckConnections = {
+    facefuckrun = nil,
+    facefuckanim = nil
+}
+
+addcmd("facefuck", {"bj", "blowjob", "head"}, function(args, speaker)
+    if not args[1] then return end
+    
+    local victim = getPlayer(args[1], speaker)
+    if #victim == 0 then return end
+    
+    local targetPlayer = Players:FindFirstChild(victim[1])
+    if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("Head") then return end
+    
+    -- Stop any existing facefuck
+    if facefuckConnections.facefuckrun then
+        facefuckConnections.facefuckrun:Disconnect()
+    end
+    
+    if facefuckConnections.facefuckanim then
+        facefuckConnections.facefuckanim:Stop()
+    end
+    
+    -- Load animation
+    local animation = Instance.new("Animation")
+    animation.AnimationId = not r15(speaker) and "rbxassetid://148840371" or "rbxassetid://5918726674"
+    facefuckConnections.facefuckanim = speaker.Character.Humanoid:LoadAnimation(animation)
+    facefuckConnections.facefuckanim:Play()
+    
+    -- Adjust speed if specified
+    if args[2] and tonumber(args[2]) then
+        facefuckConnections.facefuckanim:AdjustSpeed(tonumber(args[2]))
+    end
+    
+    -- Position update loop
+    facefuckConnections.facefuckrun = RunService.Heartbeat:Connect(function()
+        if not speaker.Character or not getRoot(speaker.Character) or 
+           not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("Head") then
+            execCmd("unfacefuck")
+            return
+        end
+        
+        getRoot(speaker.Character).CFrame = targetPlayer.Character.Head.CFrame * CFrame.new(0, 0.72, -1)
+        getRoot(speaker.Character).CFrame = getRoot(speaker.Character).CFrame * CFrame.Angles(0, math.rad(552), 0)
+    end)
+    
+    -- Handle target leaving
+    local targetLeaveConnection
+    targetLeaveConnection = targetPlayer.CharacterRemoving:Connect(function()
+        execCmd("unfacefuck")
+        notify("Target's character removed.")
+        targetLeaveConnection:Disconnect()
+    end)
+end)
+
+addcmd("unfacefuck", {"unbj", "unblowjob", "unhead"}, function(args, speaker)
+    if facefuckConnections.facefuckanim then
+        facefuckConnections.facefuckanim:Stop()
+        facefuckConnections.facefuckanim = nil
+    end
+    
+    if facefuckConnections.facefuckrun then
+        facefuckConnections.facefuckrun:Disconnect()
+        facefuckConnections.facefuckrun = nil
+    end
+    
+    notify("Facefuck stopped.")
+end)
+
+addcmd("fent", {"getfent"}, function(args, speaker)
+    local lp = speaker or game.Players.LocalPlayer
+    local char = lp.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local animator = hum and hum:FindFirstChildOfClass("Animator")
+    
+    if not char or not hum then return end
+    if hum.Health <= 0 then notify("Error", "You have to be alive to do fent") return end
+    if r15(speaker) then notify("Error", "Doing fent is R6 only, R15 rigs are more civilized") return end
+    
+    local fent = Instance.new("Tool")
+    local handle = Instance.new("Part")
+    local mesh = Instance.new("SpecialMesh")
+    local anim = Instance.new("Animation")
+    local gui = Instance.new("ScreenGui")
+    local overlay = Instance.new("Frame")
+    local track
+    
+    anim.AnimationId = "rbxassetid://27753183"
+    track = hum:LoadAnimation(anim)
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(1, 1, 1)
+    handle.CanCollide, handle.CanTouch, handle.CanQuery = false, false, false
+    mesh.MeshType = Enum.MeshType.FileMesh
+    mesh.MeshId = "rbxassetid://122250743195815"
+    mesh.TextureId = "rbxassetid://97378611424537"
+    mesh.Scale = Vector3.new(3, 3, 3)
+    gui.ClipToDeviceSafeArea = false
+    gui.ScreenInsets = Enum.ScreenInsets.None
+    overlay.Size = UDim2.fromScale(1, 1)
+    overlay.BackgroundTransparency = 0.7
+    overlay.Parent = gui
+    mesh.Parent = handle
+    handle.Parent = fent
+    fent.CanBeDropped = false
+    fent.Name = "Fent"
+    fent.ToolTip = "yummy"
+    
+    fent.Activated:Connect(function()
+        fent.Enabled = false
+        fent.Grip = CFrame.Angles(0, 0, math.rad(90))
+        track:Play()
+        track.Stopped:Connect(function()
+            fent:Destroy()
+            
+            local con = RunService.RenderStepped:Connect(function()
+                overlay.BackgroundColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+            end)
+            
+            gui.Parent = lp.PlayerGui
+            gui.Destroying:Connect(function() con:Disconnect() end)
+        end)
+    end)
+    
+    fent.Parent = lp.Backpack
+    notify("Fent", "Fentanyl has been added to your backpack")
+end)
+
+
 
 addcmd("goon", {}, function(args, speaker)
     local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
