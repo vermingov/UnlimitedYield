@@ -11165,7 +11165,31 @@ end)
 
 addcmd('universalhitboxexpander',{'hitboxexpander', 'expandhitboxes'},function(args, speaker)
 	notify("Loaded!",'Hitbox Expander Enabled!')
-    loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Update-script-hitbox-9326")) ()
+    local HeadSize = 20
+local IsDisabled = true
+local IsTeamCheckEnabled = false 
+
+game:GetService('RunService').RenderStepped:Connect(function()
+    if IsDisabled then
+        local localPlayer = game:GetService('Players').LocalPlayer
+        if not localPlayer then return end
+        
+        local localPlayerTeam = localPlayer.Team
+        
+        for _, player in ipairs(game:GetService('Players'):GetPlayers()) do
+            if player ~= localPlayer and (not IsTeamCheckEnabled or player.Team ~= localPlayerTeam) then
+                local head = player.Character and player.Character:FindFirstChild("Head")
+                if head then
+                    head.Size = Vector3.new(HeadSize, HeadSize, HeadSize)
+                    head.Transparency = 0.7
+                    head.BrickColor = BrickColor.new("Really blue")
+                    head.Material = Enum.Material.Neon
+                    head.CanCollide = false
+                end
+            end
+        end
+    end
+end)
 end)
 
 addcmd('findplaces',{},function(args, speaker)
