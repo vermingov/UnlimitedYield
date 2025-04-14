@@ -11178,13 +11178,13 @@ game:GetService('RunService').RenderStepped:Connect(function()
         
         for _, player in ipairs(game:GetService('Players'):GetPlayers()) do
             if player ~= localPlayer and (not IsTeamCheckEnabled or player.Team ~= localPlayerTeam) then
-                local head = player.Character and player.Character:FindFirstChild("Head")
-                if head then
-                    head.Size = Vector3.new(HeadSize, HeadSize, HeadSize)
-                    head.Transparency = 0.7
-                    head.BrickColor = BrickColor.new("Really blue")
-                    head.Material = Enum.Material.Neon
-                    head.CanCollide = false
+                local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    humanoidRootPart.Size = Vector3.new(HeadSize, HeadSize, HeadSize)
+                    humanoidRootPart.Transparency = 0.7
+                    humanoidRootPart.BrickColor = BrickColor.new("Really blue")
+                    humanoidRootPart.Material = Enum.Material.Neon
+                    humanoidRootPart.CanCollide = false
                 end
             end
         end
