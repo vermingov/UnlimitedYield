@@ -4379,6 +4379,8 @@ CMDs[#CMDs + 1] = {NAME = 'NLRA / northlondonremasteredautofarm / nlrautofarm', 
 CMDs[#CMDs + 1] = {NAME = 'universalhitboxexpander / hitboxexpander / expandhitboxes', DESC = 'Expands player hitbox'}
 CMDs[#CMDs + 1] = {NAME = 'begfordonations', DESC = 'Constantly begs for donations'}
 CMDs[#CMDs + 1] = {NAME = 'findplaces', DESC = 'Finds all places connected to the game'}
+CMDs[#CMDs + 1] = {NAME = 'loopbringall', DESC = 'Constantly brings all players to you'}
+CMDs[#CMDs + 1] = {NAME = 'unloopbringall', DESC = 'Stops bringing all players'}
 
 CMDs[#CMDs + 1] = {NAME = 'tweenfly', DESC = 'Allows you to fly usinf tween [Bypasses Some Anticheats]'}
 CMDs[#CMDs + 1] = {NAME = 'untweenfly / notweenfly', DESC = 'Disables tweenfly'}
@@ -11902,6 +11904,43 @@ addcmd('toggletweenfly',{},function(args, speaker)
 	else
 		execCmd('tweenfly ' .. (args[1] or ""))
 	end
+end)
+
+local LoopBringIsDisabled = true
+local LoopBringRenderStep
+addcmd('loopbringall',{''},function(args, speaker)
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local enabled = true
+
+    LoopBringRenderStep = game:GetService('RunService').RenderStepped:Connect(function()
+        if enabled then
+            for _, otherPlayer in ipairs(Players:GetPlayers()) do
+                if otherPlayer ~= player then
+                    local otherCharacter = otherPlayer.Character
+                    if otherCharacter then
+                        local otherHumanoid = otherCharacter:FindFirstChild("Humanoid")
+                        local otherHRP = otherCharacter:FindFirstChild("HumanoidRootPart")
+                        
+                        -- Check if player is alive and doesn't have forcefield
+                        if otherHumanoid and otherHRP and otherHumanoid.Health > 0 and not otherCharacter:FindFirstChild("ForceField") then
+                            -- Calculate position in front of local player
+                            local forward = humanoidRootPart.CFrame.LookVector
+                            local targetPosition = humanoidRootPart.Position + (forward * 5)
+                            
+                            -- Teleport the other player
+                            otherHRP.CFrame = CFrame.new(targetPosition)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end)
+addcmd('unloopbringall',{''},function(args, speaker)
+	LoopBringRenderStep:Disconnect()
 end)
 
 
