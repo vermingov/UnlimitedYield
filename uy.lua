@@ -55,7 +55,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "1.0.4"
+currentVersion = "1.0.5"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
