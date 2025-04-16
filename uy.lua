@@ -4381,6 +4381,10 @@ CMDs[#CMDs + 1] = {NAME = 'begfordonations', DESC = 'Constantly begs for donatio
 CMDs[#CMDs + 1] = {NAME = 'findplaces', DESC = 'Finds all places connected to the game'}
 CMDs[#CMDs + 1] = {NAME = 'loopbringall', DESC = 'Constantly brings all players to you'}
 CMDs[#CMDs + 1] = {NAME = 'unloopbringall', DESC = 'Stops bringing all players'}
+CMDs[#CMDs + 1] = {NAME = 'anchorroot / freezeroot / anchorpart', DESC = 'Anchors your character\'s root part'}
+CMDs[#CMDs + 1] = {NAME = 'unanchorroot / unfreezeroot / unanchorpart', DESC = 'Unanchors your character\'s root part'}
+CMDs[#CMDs + 1] = {NAME = 'toggleanchorroot / togglefreezeroot / toggleanchorpart', DESC = 'Toggles anchoring of your character\'s root part'}
+
 
 CMDs[#CMDs + 1] = {NAME = 'tweenfly', DESC = 'Allows you to fly usinf tween [Bypasses Some Anticheats]'}
 CMDs[#CMDs + 1] = {NAME = 'untweenfly / notweenfly', DESC = 'Disables tweenfly'}
@@ -11942,6 +11946,41 @@ end)
 addcmd('unloopbringall',{''},function(args, speaker)
 	LoopBringRenderStep:Disconnect()
 end)
+
+local rootPartAnchored = false
+addcmd('anchorroot',{'freezeroot','anchorpart'},function(args, speaker)
+	if speaker.Character then
+		local rootPart = getRoot(speaker.Character)
+		if rootPart then
+			rootPart.Anchored = true
+			rootPartAnchored = true
+			notify('Anchor Root','Root part anchored')
+		end
+	end
+end)
+
+addcmd('unanchorroot',{'unfreezeroot','unanchorpart'},function(args, speaker)
+	if speaker.Character then
+		local rootPart = getRoot(speaker.Character)
+		if rootPart then
+			rootPart.Anchored = false
+			rootPartAnchored = false
+			notify('Anchor Root','Root part unanchored')
+		end
+	end
+end)
+
+addcmd('toggleanchorroot',{'togglefreezeroot','toggleanchorpart'},function(args, speaker)
+	if speaker.Character then
+		local rootPart = getRoot(speaker.Character)
+		if rootPart then
+			rootPart.Anchored = not rootPart.Anchored
+			rootPartAnchored = not rootPartAnchored
+			notify('Anchor Root','Root part anchor toggled')
+		end
+	end
+end)
+
 
 
 addcmd('NLRA',{'northlondonremasteredautofarm', 'nlrautofarm'},function(args, speaker)
