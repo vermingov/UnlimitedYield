@@ -55,7 +55,7 @@ if not game:IsLoaded() then
     notLoaded:Destroy()
 end
 
-currentVersion = "1.0.5"
+currentVersion = "1.0.6"
 
 ScaledHolder = Instance.new("Frame")
 Scale = Instance.new("UIScale")
@@ -4384,7 +4384,7 @@ CMDs[#CMDs + 1] = {NAME = 'unloopbringall', DESC = 'Stops bringing all players'}
 CMDs[#CMDs + 1] = {NAME = 'anchorroot / freezeroot / anchorpart', DESC = 'Anchors your character\'s root part'}
 CMDs[#CMDs + 1] = {NAME = 'unanchorroot / unfreezeroot / unanchorpart', DESC = 'Unanchors your character\'s root part'}
 CMDs[#CMDs + 1] = {NAME = 'toggleanchorroot / togglefreezeroot / toggleanchorpart', DESC = 'Toggles anchoring of your character\'s root part'}
-
+CMDs[#CMDs + 1] = {NAME = 'joinsmallserver / findsmallserver', DESC = 'Joins the smallest server available'}
 
 CMDs[#CMDs + 1] = {NAME = 'tweenfly', DESC = 'Allows you to fly usinf tween [Bypasses Some Anticheats]'}
 CMDs[#CMDs + 1] = {NAME = 'untweenfly / notweenfly', DESC = 'Disables tweenfly'}
@@ -11981,7 +11981,82 @@ addcmd('toggleanchorroot',{'togglefreezeroot','toggleanchorpart'},function(args,
 	end
 end)
 
+addcmd('joinsmallserver',{'findsmallserver', ''},function(args, speaker)
+	-- Ensure this runs on the client
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
 
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+
+-- Only run if we're a player
+if not Players.LocalPlayer then
+    return
+end
+
+local placeId = game.PlaceId
+
+-- Function to get server list
+local function getServers()
+    local servers = {}
+    local success, result = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100"))
+    end)
+    
+    if success then
+        return result.data
+    end
+    return {}
+end
+
+-- Function to find smallest server
+local function findSmallestServer()
+    local servers = getServers()
+    local smallestServer = nil
+    local smallestPlayerCount = math.huge
+    local currentServerId = game.JobId
+    
+    for _, server in ipairs(servers) do
+        -- Skip current server
+        if server.id ~= currentServerId then
+            if server.playing < smallestPlayerCount then
+                smallestServer = server
+                smallestPlayerCount = server.playing
+            end
+            
+            -- If we find an empty server, join it immediately
+            if server.playing == 0 then
+                return server
+            end
+        end
+    end
+    
+    return smallestServer
+end
+
+-- Main teleport logic
+local function joinSmallestServer()
+    local targetServer = findSmallestServer()
+    
+    if targetServer then
+        local success, error = pcall(function()
+            TeleportService:TeleportToPlaceInstance(placeId, targetServer.id, Players.LocalPlayer)
+        end)
+        
+        if not success then
+            warn("Failed to teleport:", error)
+        end
+    else
+        warn("No available servers found")
+    end
+end
+
+-- Execute the server join
+joinSmallestServer()
+
+end)
 
 addcmd('NLRA',{'northlondonremasteredautofarm', 'nlrautofarm'},function(args, speaker)
 	notify("Autofarm Injected",'F4 To Toggle')
