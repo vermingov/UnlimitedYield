@@ -4370,6 +4370,8 @@ end
 CMDs = {}
 CMDs[#CMDs + 1] = {NAME = 'adonisbypass / adb', DESC = 'Bypasses Adonis Anti-Cheat'}
 CMDs[#CMDs + 1] = {NAME = 'antiwalkspeeddetector / awsd / antiws', DESC = '[BETA] Bypasses Walkspeed Detection'}
+CMDs[#CMDs + 1] = {NAME = 'antijumppowerdetector / antijp / ajpd', DESC = '[BETA] Bypasses Walkspeed Detection'}
+CMDs[#CMDs + 1] = {NAME = 'unantijumppowerdetector / unantijp / unajpd', DESC = 'Disables the walksped detection bypass'}
 CMDs[#CMDs + 1] = {NAME = 'unantiwalkspeeddetector / unawsd / unantiws', DESC = 'Disables the walksped detection bypass'}
 CMDs[#CMDs + 1] = {NAME = 'unload / killuy', DESC = 'Unloads UnlimitedYield'}
 CMDs[#CMDs + 1] = {NAME = 'stalk [player]', DESC = 'Stalks player from afar [NOT TOGGLE]'}
@@ -10941,6 +10943,140 @@ addcmd('exec',{},function(args, speaker)
 	else
 		notify("Execution", "Script executed successfully")
 	end
+end)
+
+addcmd('antijumppowerdetector', {'antijp', 'ajpd'}, function(args, speaker)
+	notify("Anti JumpPower Detector", "Enabled")
+
+	local character = speaker.Character or speaker.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+
+	-- Store the original jump power for restoration
+	local realJumpPower = humanoid.JumpPower
+	local fakeJumpPower = 50 -- Default jump power that server/anticheats will see
+
+	local spoofedProperties = {}
+
+	local mt = getrawmetatable(game)
+	local oldIndex = mt.__index
+	local oldNewIndex = mt.__newindex
+	setreadonly(mt, false)
+
+	local function secureHook(func)
+		return newcclosure(function(...)
+			local success, result = pcall(func, ...)
+			if success then return result end
+			return oldIndex(...)
+		end)
+	end
+
+	mt.__index = secureHook(function(self, key)
+		if self:IsA("Humanoid") and key == "JumpPower" then
+			if not checkcaller() then
+				return fakeJumpPower
+			else
+				return realJumpPower
+			end
+		end
+		return oldIndex(self, key)
+	end)
+
+	mt.__newindex = secureHook(function(self, key, value)
+		if self:IsA("Humanoid") and key == "JumpPower" then
+			if checkcaller() then
+				realJumpPower = value
+				task.spawn(function()
+					pcall(function()
+						for _, v in pairs(getconnections(self:GetPropertyChangedSignal("JumpPower"))) do
+							v:Disable()
+						end
+						oldNewIndex(self, key, value)
+						task.delay(0.1, function()
+							for _, v in pairs(getconnections(self:GetPropertyChangedSignal("JumpPower"))) do
+								v:Enable()
+							end
+						end)
+					end)
+				end)
+				return
+			else
+				fakeJumpPower = value
+				return
+			end
+		end
+		return oldNewIndex(self, key, value)
+	end)
+
+	setreadonly(mt, true)
+
+	local function applyRealJumpPower()
+		if not humanoid or not humanoid.Parent then return end
+
+		pcall(function()
+			local connections = getconnections(humanoid:GetPropertyChangedSignal("JumpPower"))
+			for _, v in pairs(connections) do v:Disable() end
+			humanoid.JumpPower = realJumpPower
+			task.delay(0.1, function()
+				for _, v in pairs(connections) do v:Enable() end
+			end)
+		end)
+	end
+
+	local renderStepConnection = game:GetService("RunService").RenderStepped:Connect(function()
+		if humanoid and humanoid.Parent then
+			applyRealJumpPower()
+		else
+			character = speaker.Character
+			if character then
+				humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					realJumpPower = humanoid.JumpPower
+				end
+			end
+		end
+	end)
+
+	local heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function()
+		if humanoid and humanoid.Parent then
+			applyRealJumpPower()
+		end
+	end)
+
+	local characterAddedConnection = speaker.CharacterAdded:Connect(function(newCharacter)
+		character = newCharacter
+		local success = pcall(function()
+			humanoid = newCharacter:WaitForChild("Humanoid", 5)
+		end)
+		if success and humanoid then
+			realJumpPower = humanoid.JumpPower
+			fakeJumpPower = 50
+			applyRealJumpPower()
+		end
+	end)
+
+	table.insert(Connections, renderStepConnection)
+	table.insert(Connections, heartbeatConnection)
+	table.insert(Connections, characterAddedConnection)
+
+	local function disableAntiJumpPowerDetector()
+		if renderStepConnection then renderStepConnection:Disconnect() end
+		if heartbeatConnection then heartbeatConnection:Disconnect() end
+		if characterAddedConnection then characterAddedConnection:Disconnect() end
+
+		pcall(function()
+			local mt = getrawmetatable(game)
+			setreadonly(mt, false)
+			mt.__index = oldIndex
+			mt.__newindex = oldNewIndex
+			setreadonly(mt, true)
+		end)
+
+		notify("Anti JumpPower Detector", "Disabled")
+	end
+
+	addcmd('unantijumppowerdetector', {'unantijp', 'unajpd'}, function(args, speaker)
+		disableAntiJumpPowerDetector()
+	end)
 end)
 
 
