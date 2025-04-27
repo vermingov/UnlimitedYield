@@ -11841,147 +11841,149 @@ end)
 addcmd('tweenfly',{},function(args, speaker)
 	local char = speaker.Character
 	if not char or not getRoot(char) then return end
-	
+
 	local humanoid = char:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return end
-	
+
 	-- Stop any existing tweenfly
 	execCmd('untweenfly')
-	
+
 	-- Set up variables
 	local root = getRoot(char)
 	local camera = workspace.CurrentCamera
-	local tweenService = game:GetService("TweenService")
-	local userInputService = game:GetService("UserInputService")
-	
+	local TweenService = game:GetService("TweenService")
+	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
+
 	-- Configuration
-	local flySpeed = 2
+	local flySpeed = 1
 	if args[1] and isNumber(args[1]) then
 		flySpeed = tonumber(args[1])
 	end
-	
-	-- Create attachment point that will be tweened
-	local attachmentPoint = Instance.new("Attachment")
-	attachmentPoint.Parent = workspace
-	attachmentPoint.Position = root.Position
-	attachmentPoint.Name = "TweenFlyAttachment_" .. randomString()
-	
-	-- Create AlignPosition to move character
-	local alignPos = Instance.new("AlignPosition")
-	alignPos.Attachment0 = root:FindFirstChild("RootAttachment") or root:FindFirstChild("RootRigAttachment")
-	if not alignPos.Attachment0 then
-		local att0 = Instance.new("Attachment")
-		att0.Name = "RootAttachment"
-		att0.Parent = root
-		alignPos.Attachment0 = att0
+
+	-- Advanced Tween Fly logic (from GUI)
+	local flyActive = true
+	local control = {f = 0, b = 0, l = 0, r = 0, u = 0, d = 0}
+	local bodyVel, bodyGyro
+	local flyConn
+
+	-- Helper to get move vector
+	local function getMoveVector()
+		local camCF = camera.CFrame
+		local move = Vector3.new()
+		move = move + (camCF.LookVector * (control.f - control.b))
+		move = move + (camCF.RightVector * (control.r - control.l))
+		move = move + Vector3.new(0, control.u - control.d, 0)
+		if move.Magnitude > 0 then
+			move = move.Unit
+		end
+		return move
 	end
-	alignPos.Attachment1 = attachmentPoint
-	alignPos.RigidityEnabled = false
-	alignPos.ReactionForceEnabled = false
-	alignPos.ApplyAtCenterOfMass = false
-	alignPos.MaxForce = 9e9
-	alignPos.MaxVelocity = 9e9
-	alignPos.Responsiveness = 200
-	alignPos.Parent = root
-	
-	-- Disable character physics
-	for _, part in pairs(char:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.CanCollide = false
+
+	-- Clean up function
+	local function cleanupFly()
+		if flyConn then flyConn:Disconnect() flyConn = nil end
+		if bodyVel then bodyVel:Destroy() bodyVel = nil end
+		if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+		if humanoid then
+			humanoid.PlatformStand = false
+			humanoid.AutoRotate = true
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
+			if humanoid:GetState() == Enum.HumanoidStateType.Physics or humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+				humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+				wait(0.05)
+				humanoid:ChangeState(Enum.HumanoidStateType.Running)
+			end
 		end
 	end
-	
-	-- Variables for movement
-	local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
-	local flying = true
-	local isTweening = false
-	
-	-- Connect key events
-	local keyConnection1 = userInputService.InputBegan:Connect(function(input)
-		if input.KeyCode == Enum.KeyCode.W then
-			CONTROL.F = 1
-		elseif input.KeyCode == Enum.KeyCode.S then
-			CONTROL.B = 1
-		elseif input.KeyCode == Enum.KeyCode.A then
-			CONTROL.L = 1
-		elseif input.KeyCode == Enum.KeyCode.D then
-			CONTROL.R = 1
-		elseif input.KeyCode == Enum.KeyCode.Space then
-			CONTROL.Q = 1
-		elseif input.KeyCode == Enum.KeyCode.LeftShift then
-			CONTROL.E = 1
+
+	-- Actually enable fly
+	-- Prevent ragdoll and gravity
+	humanoid.PlatformStand = false
+	humanoid.AutoRotate = false
+	humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
+
+	-- BodyVelocity for smooth movement
+	bodyVel = Instance.new("BodyVelocity")
+	bodyVel.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+	bodyVel.P = 1e4
+	bodyVel.Velocity = Vector3.new()
+	bodyVel.Parent = root
+
+	-- BodyGyro for smooth facing
+	bodyGyro = Instance.new("BodyGyro")
+	bodyGyro.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
+	bodyGyro.P = 1e4
+	bodyGyro.CFrame = root.CFrame
+	bodyGyro.Parent = root
+
+	-- Input handling
+	local keyMap = {
+		[Enum.KeyCode.W] = "f",
+		[Enum.KeyCode.S] = "b",
+		[Enum.KeyCode.A] = "l",
+		[Enum.KeyCode.D] = "r",
+		[Enum.KeyCode.Space] = "u",
+		[Enum.KeyCode.LeftShift] = "d",
+		[Enum.KeyCode.RightShift] = "d"
+	}
+
+	local inputBeganConn = UserInputService.InputBegan:Connect(function(input, gpe)
+		if gpe then return end
+		local dir = keyMap[input.KeyCode]
+		if dir then
+			control[dir] = 1
 		end
 	end)
-	
-	local keyConnection2 = userInputService.InputEnded:Connect(function(input)
-		if input.KeyCode == Enum.KeyCode.W then
-			CONTROL.F = 0
-		elseif input.KeyCode == Enum.KeyCode.S then
-			CONTROL.B = 0
-		elseif input.KeyCode == Enum.KeyCode.A then
-			CONTROL.L = 0
-		elseif input.KeyCode == Enum.KeyCode.D then
-			CONTROL.R = 0
-		elseif input.KeyCode == Enum.KeyCode.Space then
-			CONTROL.Q = 0
-		elseif input.KeyCode == Enum.KeyCode.LeftShift then
-			CONTROL.E = 0
+	local inputEndedConn = UserInputService.InputEnded:Connect(function(input, gpe)
+		if gpe then return end
+		local dir = keyMap[input.KeyCode]
+		if dir then
+			control[dir] = 0
 		end
 	end)
-	
-	-- Humanoid state handling
-	humanoid.PlatformStand = true
-	
+
 	-- Store connections for cleanup
 	_G.tweenFlyConnections = {
-		keyConnection1 = keyConnection1,
-		keyConnection2 = keyConnection2
+		inputBeganConn = inputBeganConn,
+		inputEndedConn = inputEndedConn
 	}
-	
+
 	-- Main fly loop
-	_G.tweenFlyLoop = RunService.Heartbeat:Connect(function()
-		if not flying then return end
-		
-		-- Calculate movement direction
-		local direction = Vector3.new(
-			(CONTROL.R - CONTROL.L),
-			(CONTROL.Q - CONTROL.E),
-			(CONTROL.F - CONTROL.B)
-		)
-		
-		-- Only tween if there's movement input
-		if direction.Magnitude > 0 and not isTweening then
-			direction = direction.Unit
-			
-			-- Transform direction based on camera
-			local lookVector = camera.CFrame.LookVector
-			local rightVector = camera.CFrame.RightVector
-			local upVector = Vector3.new(0, 1, 0)
-			
-			local moveVector = (rightVector * direction.X) + (upVector * direction.Y) + (lookVector * direction.Z)
-			local targetPosition = attachmentPoint.Position + (moveVector * flySpeed)
-			
-			-- Create and start tween
-			isTweening = true
-			local tween = tweenService:Create(
-				attachmentPoint,
-				TweenInfo.new(0.2, Enum.EasingStyle.Linear),
-				{Position = targetPosition}
-			)
-			
-			tween:Play()
-			tween.Completed:Wait()
-			isTweening = false
+	flyConn = RunService.RenderStepped:Connect(function(dt)
+		if not flyActive or not root or not root.Parent then return end
+		local move = getMoveVector()
+		local speed = 40 * flySpeed
+		local desiredVel = move * speed
+
+		-- Tween velocity for smooth acceleration/deceleration
+		TweenService:Create(bodyVel, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Velocity = desiredVel}):Play()
+
+		-- Face camera direction
+		local look = camera.CFrame.LookVector
+		bodyGyro.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(look.X, 0, look.Z))
+
+		-- Prevent falling through ground
+		if root.Position.Y < workspace.FallenPartsDestroyHeight + 10 then
+			root.CFrame = CFrame.new(root.Position.X, workspace.FallenPartsDestroyHeight + 20, root.Position.Z)
 		end
 	end)
-	
+	_G.tweenFlyLoop = flyConn
+
 	-- Cleanup on character death
 	local deathConnection
 	deathConnection = humanoid.Died:Connect(function()
 		execCmd('untweenfly')
 	end)
 	_G.tweenFlyConnections.deathConnection = deathConnection
-	
+
 	notify('TweenFly', 'TweenFly enabled with speed ' .. tostring(flySpeed))
 end)
 
@@ -11991,7 +11993,7 @@ addcmd('untweenfly',{'notweenfly'},function(args, speaker)
 		_G.tweenFlyLoop:Disconnect()
 		_G.tweenFlyLoop = nil
 	end
-	
+
 	if _G.tweenFlyConnections then
 		for _, connection in pairs(_G.tweenFlyConnections) do
 			if connection then
@@ -12000,7 +12002,7 @@ addcmd('untweenfly',{'notweenfly'},function(args, speaker)
 		end
 		_G.tweenFlyConnections = nil
 	end
-	
+
 	-- Clean up instances
 	local char = speaker.Character
 	if char then
@@ -12010,31 +12012,34 @@ addcmd('untweenfly',{'notweenfly'},function(args, speaker)
 				part.CanCollide = true
 			end
 		end
-		
-		-- Remove AlignPosition
+
+		-- Remove BodyVelocity and BodyGyro
 		local root = getRoot(char)
 		if root then
 			for _, child in pairs(root:GetChildren()) do
-				if child:IsA("AlignPosition") then
+				if child:IsA("BodyVelocity") or child:IsA("BodyGyro") then
 					child:Destroy()
 				end
 			end
 		end
-		
+
 		-- Reset humanoid state
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		if humanoid then
 			humanoid.PlatformStand = false
+			humanoid.AutoRotate = true
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
+			if humanoid:GetState() == Enum.HumanoidStateType.Physics or humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+				humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+				wait(0.05)
+				humanoid:ChangeState(Enum.HumanoidStateType.Running)
+			end
 		end
 	end
-	
-	-- Remove attachment point
-	for _, obj in pairs(workspace:GetChildren()) do
-		if obj:IsA("Attachment") and obj.Name:match("^TweenFlyAttachment_") then
-			obj:Destroy()
-		end
-	end
-	
+
 	notify('TweenFly', 'TweenFly disabled')
 end)
 
